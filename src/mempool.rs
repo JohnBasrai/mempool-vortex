@@ -1,3 +1,8 @@
+//! Ethereum mempool listener module for mempool-vortex.
+//!
+//! Provides functionality to connect to an Ethereum node over WebSocket,
+//! subscribe to pending transactions, decode their metadata,
+//! and invoke basic searcher logic such as high-value transaction alerts.
 use ethers::prelude::*;
 use ethers::providers::{Provider, Ws};
 use std::sync::Arc;
@@ -5,9 +10,21 @@ use tracing::{info, warn};
 
 // ---
 
-/// Connects to Ethereum node via WebSocket and listens for pending transactions.
-/// Logs each incoming transaction hash (as a smoke test).
-
+/// Starts listening to the Ethereum mempool for pending transactions.
+///
+/// Connects to the given WebSocket RPC URL, subscribes to new pending transaction hashes,
+/// fetches the full transaction data, and logs key fields.  Exits after processing a
+/// maximum number of transactions.
+///
+/// # Arguments
+///
+/// * `rpc_url`  - Ethereum WebSocket endpoint (e.g., wss://eth-sepolia.g.alchemy.com/v2/...).
+/// * `simulate` - Whether to simulate (no-op for now).
+/// * `max_tx`   - Maximum number of transactions to process before exiting.
+///
+/// # Errors
+///
+/// Returns an error if the WebSocket connection fails or transaction fetch fails.
 pub async fn listen_to_mempool(rpc_url: &str, max_tx: usize) -> anyhow::Result<()> {
     // ---
 
@@ -47,6 +64,13 @@ pub async fn listen_to_mempool(rpc_url: &str, max_tx: usize) -> anyhow::Result<(
 
 // ---
 
+/// Logs a summary of a pending transaction, including addresses, ETH value, and gas price.
+///
+/// Also highlights transactions above a value threshold with a high-value alert.
+///
+/// # Arguments
+///
+/// * `tx` - A pending Ethereum transaction to inspect and log.
 fn log_transaction(tx: &Transaction) {
     // ---
 
@@ -71,6 +95,17 @@ fn log_transaction(tx: &Transaction) {
     }
 }
 
+/// Formats an Ethereum address for log display by truncating the middle.
+///
+/// Outputs format like: `0x1234abcd…cdef`
+///
+/// # Arguments
+///
+/// * `addr` - A reference to an Ethereum address.
+///
+/// # Returns
+///
+/// A shortened hexadecimal string suitable for human-readable logs.
 fn short(addr: &ethers::types::Address) -> String {
     let hex = format!("{:?}", addr);
     format!("{}…{}", &hex[0..8], &hex[hex.len() - 4..])

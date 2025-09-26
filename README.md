@@ -1,48 +1,62 @@
 # mempool-vortex
 
-A minimal, high-performance Rust pipeline to explore Ethereum mempool activity and toy MEV searcher logic.
+[![Rust](https://img.shields.io/badge/Rust-Edition%202021-orange)](https://www.rust-lang.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-## 🚀 Features
+🚀 A fast Rust pipeline for simulating MEV behavior via Ethereum mempool observation.
+> An educational repo to simulate Ethereum MEV behavior using Rust, built for showcasing backend + low-latency system skills.
 
-- Connects to Ethereum testnet mempool via WebSocket
-- Simulates arbitrage logic between mock DEX pools
-- Modular architecture for low-latency event-driven flow
-- Built with `tokio`, `ethers-rs`, and clean async structure
+## Features
 
-## 🧪 Goals
+- Connects to Ethereum RPC via WebSocket (e.g., Sepolia on Alchemy)
+- Listens to pending transactions in real-time
+- Logs sender, receiver, value, and gas price
+- Highlights high-value transfers
+- CLI flags for logging, color control, and RPC URL
+- Graceful fallback to `.env` for configuration
 
-This is not a production MEV bot. It's a focused repo to:
-- Demonstrate systems thinking applied to MEV
-- Explore real-time blockchain data flow
-- Build credibility in performance blockchain infrastructure
+## Usage
 
-## 🛠️ Run Locally
-
-```bash
-cp .env.example .env
-cargo run
+```sh
+cargo run --release -- [OPTIONS]
 ```
 
-## 📦 Structure
+### Options
 
-- `mempool.rs` – Connect and stream pending transactions
-- `searcher.rs` – Analyze toy arbitrage conditions
-- `bundler.rs` – (Optional) Submit bundles
-- `types.rs` – Shared config/types
+|  Flag / Option                  |  Description                                      |
+|:--------------------------------|:--------------------------------------------------|
+| `-v`, `--verbose`               | Enable debug logging                              |
+| `--rpc-url <RPC_URL>`           | Ethereum WebSocket URL (can use `.env`)           |
+| `--simulate`                    | Run in simulation mode (stub)                     |
+| `--max-tx <MAX_TX>`             | Number of transactions to process (default: 200)  |
+| `--color <auto\|always\|never>` | Control ANSI color in log output                  |
 
-## 🔐 .env Setup
+## Setup
 
-To run `mempool-vortex`, you need to create a `.env` file in the project root:
+1. Create a free account at [Alchemy](https://alchemy.com) and get a Sepolia WebSocket URL.
+2. Create a `.env` file:
+
+   ```env
+   ETH_RPC_URL=wss://eth-sepolia.g.alchemy.com/v2/your_api_key
+   ```
+
+3. Run:
+
+   ```sh
+   cargo run --release
+   ```
+
+## Example Output
 
 ```
-cp .env.example .env
+📡 Listening to pending transactions...
+🔍 tx: from=0xabc…1234 → to=0xdef…5678, value=0.05 ETH, gas_price=10.2 gwei
+🚨 High-value tx detected: 1.25 ETH
+✅ Processed 200 transactions. Exiting.
 ```
-Then edit `.env` and set your Ethereum RPC URL:
 
-```
-ETH_RPC_URL=wss://sepolia.infura.io/ws/v3/YOUR_KEY
-PRIVATE_KEY=0xyourprivatekeyhere
-```
+## License
+
+MIT
 
 ---
-Built for learning, exploration, and sharp systems design ✌️

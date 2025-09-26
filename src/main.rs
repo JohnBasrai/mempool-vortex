@@ -1,3 +1,9 @@
+//! mempool-vortex
+//!
+//! A fast Rust pipeline for simulating MEV behavior via Ethereum mempool observation.
+//! Connects to an Ethereum node via WebSocket, listens for pending transactions,
+//! and logs relevant details. Includes optional filtering, logging, and formatting controls.
+
 use clap::Parser;
 use dotenv::dotenv;
 use tracing::{debug, info};
@@ -10,6 +16,7 @@ mod types;
 
 // ---
 
+/// Application entry point.
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     // ---
@@ -62,6 +69,7 @@ async fn main() -> anyhow::Result<()> {
 
 // ---
 
+/// Command-line arguments for mempool-vortex.
 #[derive(Parser, Debug)]
 #[command(
     name = "mempool-vortex",
@@ -78,14 +86,16 @@ pub struct Args {
     #[arg(long)]
     pub simulate: bool,
 
-    /// Ethereum RPC WebSocket URL to connect too, (e.g., wss://...)
+    /// Ethereum RPC WebSocket URL (e.g., wss://...)
+    ///
+    /// Optional: If not provided, will be read from `.env` as `ETH_RPC_URL`.
     #[arg(
         long,
         help = "Ethereum RPC WebSocket URL (e.g., wss://...). Optional: can also be set via ETH_RPC_URL in .env"
     )]
     rpc_url: Option<String>,
 
-    /// Maximum number of transactions to process before exiting
+    /// Maximum number of transactions to process before exiting.
     #[arg(
         long,
         default_value = "200",
@@ -93,14 +103,18 @@ pub struct Args {
     )]
     pub max_tx: usize,
 
-    /// Control colored log output for terminal compatibility
+    /// Control colored log output for terminal compatibility.
+    ///
+    /// - auto: Detect terminal capabilities (default)
+    /// - always: Force color output
+    /// - never: Disable color output
     #[arg(long, value_enum, default_value = "auto")]
     pub color: ColorChoice,
 }
 
 // ---
 
-/// Controls colored output in logs
+/// Available options for controlling terminal log color output.
 #[derive(clap::ValueEnum, Clone, Debug)]
 pub enum ColorChoice {
     Auto,
