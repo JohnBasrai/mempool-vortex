@@ -16,13 +16,13 @@ async fn main() -> anyhow::Result<()> {
 
     dotenv().ok();
 
-    let args = Args::parse();
-    let log_level = if args.verbose { "debug" } else { "info" };
+    let cli = Args::parse();
+    let log_level = if cli.verbose { "debug" } else { "info" };
 
     // ---
 
     // Initialize tracing with smart colorization
-    let use_color = match args.color {
+    let use_color = match cli.color {
         ColorChoice::Always => true,
         ColorChoice::Never => false,
         ColorChoice::Auto => {
@@ -37,12 +37,23 @@ async fn main() -> anyhow::Result<()> {
         .init();
 
     info!("🚀 mempool-vortex starting...");
-    debug!("CLI args: {:?}", args);
+    debug!("CLI args: {:?}", cli);
+
+    // Final RPC URL, use command line if available else fallback to .env
+    let rpc_url = cli
+        .rpc_url
+        .clone()
+        .or_else(|| std::env::var("ETH_RPC_URL").ok())
+        .ok_or_else(|| {
+            anyhow::anyhow!(
+                "Missing Ethereum RPC URL: provide via --rpc-url or set ETH_RPC_URL in .env"
+            )
+        })?;
 
     // ---
 
     // Placeholder for pipeline
-    mempool::listen_to_mempool().await?;
+    mempool::listen_to_mempool(&rpc_url, cli.max_tx).await?;
     // searcher::evaluate_opportunity();
     // bundler::send_bundle().await?;
 
@@ -58,6 +69,7 @@ async fn main() -> anyhow::Result<()> {
     about = "A fast Rust pipeline for simulating MEV behavior via Ethereum mempool observation."
 )]
 pub struct Args {
+    // --
     /// Enable verbose (debug) logging
     #[arg(short, long)]
     pub verbose: bool,
@@ -65,6 +77,21 @@ pub struct Args {
     /// Run in simulation mode (no real bundle submission)
     #[arg(long)]
     pub simulate: bool,
+
+    /// Ethereum RPC WebSocket URL to connect too, (e.g., wss://...)
+    #[arg(
+        long,
+        help = "Ethereum RPC WebSocket URL (e.g., wss://...). Optional: can also be set via ETH_RPC_URL in .env"
+    )]
+    rpc_url: Option<String>,
+
+    /// Maximum number of transactions to process before exiting
+    #[arg(
+        long,
+        default_value = "200",
+        help = "Maximum number of transactions to process before exiting"
+    )]
+    pub max_tx: usize,
 
     /// Control colored log output for terminal compatibility
     #[arg(long, value_enum, default_value = "auto")]
