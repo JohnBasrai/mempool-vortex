@@ -8,12 +8,16 @@
 
 ## Features
 
+- Streams real-time pending Ethereum transactions
 - Connects to Ethereum RPC via WebSocket (e.g., Sepolia on Alchemy)
-- Listens to pending transactions in real-time
 - Logs sender, receiver, value, and gas price
+- Per-transaction latency measurement and structured logging
 - Highlights high-value transfers
-- CLI flags for logging, color control, and RPC URL
+- Address formatting options: short elided or full checksummed (via `--addr-style`)
+- Formatted debug output for in-depth inspection of each transaction
+- CLI flags for logging verbosity, RPC URL, and terminal color control
 - Graceful fallback to `.env` for configuration
+
 
 ## Usage
 
@@ -50,8 +54,8 @@ cargo run --release -- [OPTIONS]
 
 ```
 📡 Listening to pending transactions...
+⏱️ Processed tx latency_ms=73 from=0xabc…1234 to=0xdef…5678 value_eth="0.05" gas_price_gwei="10.2"
 🔍 tx: from=0xabc…1234 → to=0xdef…5678, value=0.05 ETH, gas_price=10.2 gwei
-🚨 High-value tx detected: 1.25 ETH
 ✅ Processed 200 transactions. Exiting.
 ```
 
