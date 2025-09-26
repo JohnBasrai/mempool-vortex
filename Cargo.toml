@@ -1,0 +1,26 @@
+[package]
+name = "mempool-vortex"
+version = "0.1.0"
+edition = "2021"
+authors = ["John Basrai <john@basrai.dev>"]
+description = "A fast, modular Rust pipeline for observing Ethereum mempool activity and simulating MEV searcher behavior."
+
+[dependencies]
+# Async runtime
+tokio = { version = "1", features = ["macros", "rt", "rt-multi-thread"] }
+
+# Ethereum interaction
+ethers = { version = "2.0", features = ["ws"] }
+
+# CLI
+clap = { version = "4.4", features = ["derive"] }
+
+# Config, error handling, serialization
+dotenv = "0.15"
+anyhow = "1.0"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+# Tracing (logging)
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt"] }
