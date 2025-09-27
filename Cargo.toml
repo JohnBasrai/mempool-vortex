@@ -13,7 +13,7 @@ tokio = { version = "1", features = ["macros", "rt", "rt-multi-thread"] }
 ethers = { version = "2.0", features = ["ws"] }
 
 # CLI
-clap = { version = "4.4", features = ["derive"] }
+clap = { version = "4.4", features = ["derive", "env"] }
 
 # Config, error handling, serialization
 dotenv = "0.15"

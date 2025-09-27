@@ -7,7 +7,7 @@
 use clap::Parser;
 use dotenv::dotenv;
 use tracing::{debug, info};
-use tracing_subscriber;
+//e tracing_subscriber;
 
 mod bundler;
 mod mempool;
@@ -60,7 +60,7 @@ async fn main() -> anyhow::Result<()> {
     // ---
 
     // Placeholder for pipeline
-    mempool::listen_to_mempool(&rpc_url, cli.max_tx).await?;
+    mempool::listen_to_mempool(&rpc_url, cli.max_tx, cli.addr_style).await?;
     // searcher::evaluate_opportunity();
     // bundler::send_bundle().await?;
 
@@ -74,7 +74,14 @@ async fn main() -> anyhow::Result<()> {
 #[command(
     name = "mempool-vortex",
     version,
-    about = "A fast Rust pipeline for simulating MEV behavior via Ethereum mempool observation."
+    about = "Observe Ethereum mempool and simulate MEV-style processing.",
+    long_about = "Observe Ethereum mempool via WebSocket and simulate MEV-style processing.\n\
+                  Streams pending transactions, logs key fields, and measures per-tx latency.\n\
+                  Addresses render as short/Full checksummed formats for readable logs.",
+    after_long_help = "Examples:\n  \
+        mempool-vortex --max-tx 200\n  \
+        mempool-vortex --rpc-url wss://eth-sepolia.g.alchemy.com/v2/KEY --verbose\n  \
+        ETH_RPC_URL=wss://eth-sepolia.g.alchemy.com/v2/KEY mempool-vortex --addr-style full"
 )]
 pub struct Args {
     // --
@@ -86,30 +93,43 @@ pub struct Args {
     #[arg(long)]
     pub simulate: bool,
 
-    /// Ethereum RPC WebSocket URL (e.g., wss://...)
+    /// Ethereum RPC WebSocket URL to connect to.
     ///
-    /// Optional: If not provided, will be read from `.env` as `ETH_RPC_URL`.
+    /// Optional: can also be provided via the ETH_RPC_URL environment variable
+    /// (dotenv is supported).
     #[arg(
         long,
-        help = "Ethereum RPC WebSocket URL (e.g., wss://...). Optional: can also be set via ETH_RPC_URL in .env"
+        value_name = "WSS_URL",
+        env = "ETH_RPC_URL" // clap reads from env (dotenv already loaded in main)
     )]
     rpc_url: Option<String>,
 
     /// Maximum number of transactions to process before exiting.
     #[arg(
         long,
+        value_name = "N",
         default_value = "200",
         help = "Maximum number of transactions to process before exiting"
     )]
     pub max_tx: usize,
 
     /// Control colored log output for terminal compatibility.
-    ///
-    /// - auto: Detect terminal capabilities (default)
-    /// - always: Force color output
-    /// - never: Disable color output
-    #[arg(long, value_enum, default_value = "auto")]
+    #[arg(long, value_enum, value_name = "MODE", default_value = "auto")]
     pub color: ColorChoice,
+
+    /// Controls how Ethereum addresses are rendered in logs.
+    ///
+    /// Use `short` for compact logs or `full` when debugging exact addresses.
+    #[arg(
+        long,
+        value_enum,
+        value_name = "STYLE",
+        default_value = "short",
+        long_help = "Controls how Ethereum addresses are rendered in logs.\n\
+                     • short: checksummed with middle elided (e.g., 0x12Abcd…90ef)\n\
+                     • full:  full EIP-55 checksummed address"
+    )]
+    pub addr_style: AddrStyle,
 }
 
 // ---
@@ -120,4 +140,15 @@ pub enum ColorChoice {
     Auto,
     Always,
     Never,
+}
+
+/// How to render Ethereum addresses in logs.
+#[derive(clap::ValueEnum, Clone, Debug)]
+pub enum AddrStyle {
+    // ---
+    /// Checksummed address with the middle elided for compact logs.
+    Short,
+
+    /// Full EIP-55 checksummed address with no elision.
+    Full,
 }
