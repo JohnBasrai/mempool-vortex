@@ -2,12 +2,11 @@
 //!
 //! A fast Rust pipeline for simulating MEV behavior via Ethereum mempool observation.
 //! Connects to an Ethereum node via WebSocket, listens for pending transactions,
-//! and logs relevant details. Includes optional filtering, logging, and formatting controls.
+//! analyzes them for MEV opportunities, and creates/submits bundles for execution.
 
 use clap::Parser;
 use dotenv::dotenv;
 use tracing::{debug, info};
-//e tracing_subscriber;
 
 mod bundler;
 mod mempool;
@@ -59,11 +58,17 @@ async fn main() -> anyhow::Result<()> {
 
     // ---
 
-    // Placeholder for pipeline
-    mempool::listen_to_mempool(&rpc_url, cli.max_tx, cli.addr_style).await?;
-    // searcher::evaluate_opportunity();
-    // bundler::send_bundle().await?;
+    // Complete MEV pipeline
+    info!("🔗 Starting MEV pipeline...");
 
+    if cli.simulate {
+        info!("🧪 Running in simulation mode - no actual bundle submissions");
+    }
+
+    // Start mempool listener with integrated MEV detection and execution
+    mempool::listen_to_mempool(&rpc_url, cli.max_tx, cli.addr_style, cli.simulate).await?;
+
+    info!("✅ MEV pipeline completed successfully");
     Ok(())
 }
 
@@ -76,12 +81,14 @@ async fn main() -> anyhow::Result<()> {
     version,
     about = "Observe Ethereum mempool and simulate MEV-style processing.",
     long_about = "Observe Ethereum mempool via WebSocket and simulate MEV-style processing.\n\
-                  Streams pending transactions, logs key fields, and measures per-tx latency.\n\
+                  Streams pending transactions, analyzes them for MEV opportunities,\n\
+                  and creates/submits bundles for arbitrage, sandwich attacks, and liquidations.\n\
                   Addresses render as short/Full checksummed formats for readable logs.",
     after_long_help = "Examples:\n  \
         mempool-vortex --max-tx 200\n  \
         mempool-vortex --rpc-url wss://eth-sepolia.g.alchemy.com/v2/KEY --verbose\n  \
-        ETH_RPC_URL=wss://eth-sepolia.g.alchemy.com/v2/KEY mempool-vortex --addr-style full"
+        mempool-vortex --simulate --addr-style full\n  \
+        ETH_RPC_URL=wss://eth-sepolia.g.alchemy.com/v2/KEY mempool-vortex --simulate"
 )]
 pub struct Args {
     // --
