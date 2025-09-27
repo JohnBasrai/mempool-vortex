@@ -24,16 +24,23 @@
 ```sh
 cargo run --release -- [OPTIONS]
 ```
+### ⚙️ Command Line Options
 
-### Options
+| Flag / Option                   | Description                                                                                   | Default        |
+| ------------------------------- | --------------------------------------------------------------------------------------------- | -------------- |
+| `--verbose`                     | Enable verbose logging (DEBUG level)                                                          | `false`        |
+| `--simulate`                    | Enable simulation mode (no actual execution)                                                  | `false`        |
+| `--max-tx <N>`                  | Stop after processing `N` transactions                                                        | Unlimited      |
+| `--rpc-url <URL>`               | Ethereum RPC WebSocket endpoint (can also be set via `ETH_RPC_URL` env var)                   | `.env` or none |
+| `--color <auto\|always\|never>` | Control ANSI color output in logs                                                             | `auto`         |
+| `--addr-style <short\|full>`    | Address display style:<br>• `short`: checksummed, middle elided<br>• `full`: full checksummed | `short`        |
+| `-h`, `--help`                  | Show help message                                                                             | —              |
 
-|  Flag / Option                  |  Description                                      |
-|:--------------------------------|:--------------------------------------------------|
-| `-v`, `--verbose`               | Enable debug logging                              |
-| `--rpc-url <RPC_URL>`           | Ethereum WebSocket URL (can use `.env`)           |
-| `--simulate`                    | Run in simulation mode (stub)                     |
-| `--max-tx <MAX_TX>`             | Number of transactions to process (default: 200)  |
-| `--color <auto\|always\|never>` | Control ANSI color in log output                  |
+### Example usage
+
+```
+cargo run -- --verbose --addr-style full --max-tx 20
+```
 
 ## Setup
 
