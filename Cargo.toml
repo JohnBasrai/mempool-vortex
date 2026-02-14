@@ -1,6 +1,6 @@
 [package]
 name = "mempool-vortex"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2021"
 authors = ["John Basrai <john@basrai.dev>"]
 description = "A fast, modular Rust pipeline for observing Ethereum mempool activity and simulating MEV searcher behavior."

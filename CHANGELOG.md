@@ -1,27 +1,28 @@
-# Changelog
-
-## [Unreleased]
+## [0.2.0] - 2025-09-27
 
 ### Added
-- Latency tracking for transaction processing using `Instant`
-- Per-transaction debug logs with sender, receiver, ETH value, gas price, and processing time
-- Address rendering options via `--addr-style` CLI flag:
-  - `short` (default): displays checksummed address with middle elided (`0x12Ab…c34F`)
-  - `full`: displays full EIP-55 checksummed address
-- Rich `--help` output with examples and inline documentation
+- 🚀 **MEV pipeline integration**:
+  - `searcher.rs`: detects arbitrage, sandwich, and liquidation opportunities from live txs
+  - `bundler.rs`: builds MEV bundles and simulates submission to Flashbots, bloXroute, Eden
+  - `mempool.rs`: orchestrates full detection-to-execution pipeline
+- 🧪 `--simulate` mode for dry-run MEV testing (no actual bundle submission)
+- 🎨 CLI enhancements:
+  - `--addr-style short|full` for pretty address formatting
+  - `--color` control for ANSI log output
+  - `--max-tx` to cap number of txs processed
+- 📦 Bundle tracking with UUIDs, gas estimates, and simulated inclusion probabilities
+- 🔍 Transaction classification and decoding (Uniswap V2/V3, ERC20 transfers, etc.)
+- 🧰 Scaffolding for configuration (`types.rs::Config`) and performance metrics (`MEVMetrics`)
+- 🧱 Base structure for adding new DEXes, strategies, and real relay submission
 
-### Changed
-- Structured debug and info log formatting for clarity and traceability
-- Transaction fetch tasks now use `tokio::JoinSet` for coordinated async processing
+### Fixed
+- 🐛 Compilation failure due to `AddrStyle` being moved in async logger
+- 🧼 Clean startup flow with dotenv fallback and tracing initialization
 
-## [0.1.0] - 2025-09-27
-
-### Added
-
-- Ethereum mempool listener via WebSocket
-- CLI with logging and color control
-- `.env` fallback support
-- Basic searcher: detect and log high-value ETH transactions
-- Structured doc comments for main and core module
-- Latency tracking for transaction processing using `Instant`
-- Per-transaction debug logs with sender, receiver, ETH value, gas price, and processing time
+### Notes
+- This release establishes the foundation for real MEV simulation and bundle orchestration.
+- Future versions will include:
+  - Integration test harness
+  - Config + metrics usage
+  - Live RPC interaction with relay APIs
+  - Risk + profitability constraints
